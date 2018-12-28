@@ -7,11 +7,7 @@ ccflags-y += -Idrivers/usb/host -Idrivers/base/power
 
 obj-$(CONFIG_USB_DWC3)			+= dwc3.o
 
-dwc3-y					:= core.o
-
-ifdef CONFIG_DEBUG_KERNEL
-dwc3-y					+= debug.o trace.o
-endif
+dwc3-y					:= core.o debug.o trace.o
 
 ifneq ($(filter y,$(CONFIG_USB_DWC3_HOST) $(CONFIG_USB_DWC3_DUAL_ROLE)),)
 	dwc3-y				+= host.o
