@@ -3142,12 +3142,9 @@ static unsigned long balance_pgdat(pg_data_t *pgdat, int order,
 		bool raise_priority = true;
 		bool pgdat_needs_compaction = (order > 0);
 
-		sc.nr_reclaimed = 0;
-
-#ifdef CONFIG_ANDROID_SIMPLE_LMK
-		if (sc.priority == CONFIG_ANDROID_SIMPLE_LMK_AGGRESSION)
-			simple_lmk_start_reclaim();
-#endif
+	sc.nr_reclaimed = 0;
+		sc.reclaim_idx = classzone_idx;
+		simple_lmk_decide_reclaim(sc.priority);
 
 		/*
 		 * Scan in the highmem->dma direction for the highest
@@ -3333,9 +3330,6 @@ static void kswapd_try_to_sleep(pg_data_t *pgdat, int order, int classzone_idx)
 	 * succeed.
 	 */
 	if (prepare_kswapd_sleep(pgdat, order, remaining, classzone_idx)) {
-#ifdef CONFIG_ANDROID_SIMPLE_LMK
-		simple_lmk_stop_reclaim();
-#endif
 
 		remaining = schedule_timeout(HZ/10);
 		finish_wait(&pgdat->kswapd_wait, &wait);
@@ -3347,9 +3341,7 @@ static void kswapd_try_to_sleep(pg_data_t *pgdat, int order, int classzone_idx)
 	 * go fully to sleep until explicitly woken up.
 	 */
 if (prepare_kswapd_sleep(pgdat, order, remaining, classzone_idx)) {
-#ifdef CONFIG_ANDROID_SIMPLE_LMK
 		simple_lmk_stop_reclaim();
-#endif
 		trace_mm_vmscan_kswapd_sleep(pgdat->node_id);
 
 		/*

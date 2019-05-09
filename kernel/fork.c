@@ -76,6 +76,7 @@
 #include <linux/aio.h>
 #include <linux/compiler.h>
 #include <linux/kcov.h>
+#include <linux/simple_lmk.h>
 
 #include <asm/pgtable.h>
 #include <asm/pgalloc.h>
@@ -669,10 +670,6 @@ EXPORT_SYMBOL_GPL(__mmdrop);
 
 static inline void __mmput(struct mm_struct *mm)
 {
-#ifdef CONFIG_ANDROID_SIMPLE_LMK
-	wait_queue_head_t *slmk_waitq = mm->slmk_waitq;
-	atomic_t *slmk_counter = mm->slmk_counter;
-#endif
 	VM_BUG_ON(atomic_read(&mm->mm_users));
 
 	uprobe_clear_state(mm);
@@ -689,12 +686,7 @@ static inline void __mmput(struct mm_struct *mm)
 	if (mm->binfmt)
 		module_put(mm->binfmt->module);
 	mmdrop(mm);
-#ifdef CONFIG_ANDROID_SIMPLE_LMK
-	if (slmk_waitq) {
-		atomic_dec(slmk_counter);
-		wake_up(slmk_waitq);
-	}
-#endif
+	simple_lmk_mm_freed(mm);
 }
 
 /*
