@@ -32,25 +32,14 @@
 #ifdef CONFIG_PROVE_LOCKING
 int lockdep_rht_mutex_is_held(const struct rhashtable *ht)
 {
-return ht->p.mutex_is_held();
-#ifdef CONFIG_DEBUG_KERNEL
-	return (debug_locks) ? lockdep_is_held(&ht->mutex) : 1;
-#else
-	return 1;
-#endif
+	return ht->p.mutex_is_held();
 }
 EXPORT_SYMBOL_GPL(lockdep_rht_mutex_is_held);
 #endif
 
 static void *rht_obj(const struct rhashtable *ht, const struct rhash_head *he)
 {
-	spinlock_t *lock = rht_bucket_lock(tbl, hash);
-
-#ifdef CONFIG_DEBUG_KERNEL
-	return (debug_locks) ? lockdep_is_held(lock) : 1;
-#else
-	return 1;
-#endif
+	return (void *) he - ht->p.head_offset;
 }
 
 static u32 __hashfn(const struct rhashtable *ht, const void *key,
