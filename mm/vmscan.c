@@ -3143,7 +3143,6 @@ static unsigned long balance_pgdat(pg_data_t *pgdat, int order,
 		bool pgdat_needs_compaction = (order > 0);
 
 	sc.nr_reclaimed = 0;
-		sc.reclaim_idx = classzone_idx;
 		simple_lmk_decide_reclaim(sc.priority);
 
 		/*
